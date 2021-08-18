@@ -1,8 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-
-use App\Order;
+use App\Models\Order;
 use DB;
 use Illuminate\Http\Request;
 
@@ -58,9 +57,10 @@ class OrderController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit($order_no)
     {
-        //
+        $order = DB::select('select * from orders where order_no =?', [$order_no]);
+        return view('editOrder',['order'=>$order]);
     }
 
     /**
@@ -70,9 +70,20 @@ class OrderController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request,$order_no)
     {
-        //
+        $orders = Order::find($order_no);
+        $orders->product_name = $request->get('product_name');
+        $orders->quantity = $request->get('quantity');
+        $orders->price_each = $request->get('price_each');
+        $orders->estimated = $request->get('estimated');
+        $orders->bil_address = $request->get('bil_address');
+        $orders->ship_address = $request->get('ship_address');
+        $orders->total = $request->get('total');
+        $orders->payment_method= $request->get('payment_method');
+        $orders->save();
+
+        return redirect('/')->with('Success','Data Updated!');
     }
 
     /**
@@ -81,8 +92,23 @@ class OrderController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function delete($order_no)
     {
-        //
+        DB::delete('delete from orders where order_no = ?', [$order_no]);
+        return redirect('/')->with('Success','Data Deleted!');
+    }
+
+    public function search(Request $request)
+    {
+        $search = $request->get('search');
+        $order = DB::table('orders')->where('product_name','like','%'.$search.'%')
+                    ->orwhere('order_no','like','%'.$search.'%')
+                    ->orwhere('total','like','%'.$search.'%')
+                    ->orwhere('payment_method','like','%'.$search.'%')
+                    ->orwhere('ship_address','like','%'.$search.'%')
+                    ->orwhere('bil_address','like','%'.$search.'%')
+                    ->orwhere('quantity','like','%'.$search.'%')->paginate(5);
+
+        return view('welcome',['order'=>$order]);
     }
 }

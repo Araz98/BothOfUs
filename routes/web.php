@@ -17,6 +17,12 @@ use DB;
 Route::get('/','App\Http\Controllers\OrderController@show');
 Route::get('/','App\Http\Controllers\OrderController@index');
 
+Route::get('edit/{order_no}','App\Http\Controllers\OrderController@edit');
+Route::post('/update/{order_no}','App\Http\Controllers\OrderController@update');
+
+Route::get('delete/{order_no}','App\Http\Controllers\OrderController@delete');
+Route::get('/search','App\Http\Controllers\OrderController@search');
+
 Auth::routes();
 
 
